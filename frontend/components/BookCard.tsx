@@ -94,17 +94,18 @@ export default function BookCard({ book }: BookCardProps) {
               </span>
             )}
             {book.book_url && (
-              <a
-                href={book.book_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(book.book_url, '_blank', 'noopener,noreferrer');
+                }}
                 className="flex items-center gap-1 text-xs transition-colors"
-                style={{ color: '#6366f1' }}
+                style={{ color: '#6366f1', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
               >
                 <ExternalLink size={11} />
                 View
-              </a>
+              </button>
             )}
           </div>
         </div>

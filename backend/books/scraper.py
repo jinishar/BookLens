@@ -1,22 +1,14 @@
 """
-Selenium-based scraper for books.toscrape.com
-Scrapes book title, author (if available), rating, price, cover image, and detail page.
+Requests-based scraper for books.toscrape.com
+Fast, reliable, and does not require headless Chrome.
 """
 import time
 import re
 import logging
 from typing import List, Dict, Optional
-
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 logger = logging.getLogger(__name__)
 
@@ -28,29 +20,7 @@ RATING_MAP = {
     'Five': 5.0,
 }
 
-BASE_URL = "https://books.toscrape.com"
-
-
-def get_driver():
-    """Initialize headless Chrome driver."""
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1920,1080')
-    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
-
-    try:
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
-    except Exception as e:
-        logger.warning(f"ChromeDriverManager failed: {e}, trying system Chrome...")
-        driver = webdriver.Chrome(options=options)
-
-    driver.set_page_load_timeout(30)
-    return driver
-
+BASE_URL = "https://books.toscrape.com/"
 
 def parse_rating(rating_class: str) -> float:
     """Convert CSS class rating word to numeric."""
@@ -59,8 +29,7 @@ def parse_rating(rating_class: str) -> float:
             return val
     return 0.0
 
-
-def scrape_book_detail(driver, book_url: str) -> Dict:
+def scrape_book_detail(session: requests.Session, book_url: str) -> Dict:
     """Scrape detailed info from a book's page."""
     detail = {
         'description': '',
@@ -70,18 +39,18 @@ def scrape_book_detail(driver, book_url: str) -> Dict:
         'author': 'Unknown',
         'genre': '',
     }
-
+    
     try:
-        driver.get(book_url)
-        time.sleep(1)
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        response = session.get(book_url, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
 
         # Description
         desc_div = soup.find('div', id='product_description')
         if desc_div and desc_div.find_next_sibling('p'):
             detail['description'] = desc_div.find_next_sibling('p').get_text(strip=True)
 
-        # Table info
+        # Table info (UPC, Availability, Reviews)
         table = soup.find('table', class_='table-striped')
         if table:
             rows = table.find_all('tr')
@@ -116,53 +85,46 @@ def scrape_book_detail(driver, book_url: str) -> Dict:
 
     return detail
 
-
 def scrape_books(num_pages: int = 1, category: str = '') -> List[Dict]:
     """
-    Main scraping function. Scrapes books.toscrape.com.
-    
-    Args:
-        num_pages: Number of catalogue pages to scrape (max 50 available)
-        category: Optional category slug to filter by
-    
-    Returns:
-        List of book dicts
+    Main scraping function using Requests/BeautifulSoup.
+    Scrapes books.toscrape.com incredibly fast.
     """
-    driver = get_driver()
     books = []
-
+    session = requests.Session()
+    
     try:
         if category:
-            start_url = f"{BASE_URL}/catalogue/category/books/{category}/index.html"
+            start_url = f"{BASE_URL}catalogue/category/books/{category}/index.html"
         else:
-            start_url = f"{BASE_URL}/catalogue/page-1.html"
+            start_url = f"{BASE_URL}catalogue/page-1.html"
 
         current_url = start_url
         page = 0
 
         while current_url and page < num_pages:
             logger.info(f"Scraping page {page + 1}: {current_url}")
-            driver.get(current_url)
-            time.sleep(1.5)
-
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
+            response = session.get(current_url, timeout=10)
+            
+            # books.toscrape.com returns 404 if page doesn't exist
+            if response.status_code != 200:
+                break
+                
+            soup = BeautifulSoup(response.text, 'html.parser')
             book_cards = soup.find_all('article', class_='product_pod')
+
+            if not book_cards:
+                break
 
             for card in book_cards:
                 try:
-                    # Title
+                    # Title and URL
                     title_tag = card.find('h3').find('a')
                     title = title_tag.get('title', title_tag.get_text(strip=True))
-
-                    # Relative URL
                     relative_url = title_tag.get('href', '')
-                    if relative_url.startswith('../'):
-                        relative_url = relative_url.replace('../', '')
-                        book_url = f"{BASE_URL}/catalogue/{relative_url}"
-                    elif relative_url.startswith('catalogue/'):
-                        book_url = f"{BASE_URL}/{relative_url}"
-                    else:
-                        book_url = f"{BASE_URL}/catalogue/{relative_url}"
+                    
+                    # Resolve absolute URL safely
+                    book_url = urljoin(current_url, relative_url)
 
                     # Rating
                     rating_tag = card.find('p', class_='star-rating')
@@ -179,11 +141,7 @@ def scrape_books(num_pages: int = 1, category: str = '') -> List[Dict]:
                     cover_image_url = ''
                     if img_tag:
                         src = img_tag.get('src', '')
-                        if src.startswith('../'):
-                            src = src.replace('../../', '')
-                            cover_image_url = f"{BASE_URL}/{src}"
-                        else:
-                            cover_image_url = f"{BASE_URL}/{src.lstrip('/')}"
+                        cover_image_url = urljoin(current_url, src)
 
                     book_data = {
                         'title': title,
@@ -199,29 +157,22 @@ def scrape_books(num_pages: int = 1, category: str = '') -> List[Dict]:
                         'upc': '',
                     }
 
-                    # Scrape detail page
-                    logger.info(f"  → Detail: {title}")
-                    detail = scrape_book_detail(driver, book_url)
+                    # Scrape inside detail page for description/genre/etc
+                    # (This takes a moment per book)
+                    detail = scrape_book_detail(session, book_url)
                     book_data.update(detail)
 
                     books.append(book_data)
-                    logger.info(f"  ✓ Scraped: {title} | Genre: {detail.get('genre')} | Rating: {rating}")
 
                 except Exception as e:
                     logger.error(f"Error parsing book card: {e}")
                     continue
 
-            # Next page
+            # Check next page link
             next_btn = soup.find('li', class_='next')
             if next_btn and page + 1 < num_pages:
                 next_href = next_btn.find('a').get('href', '')
-                if category:
-                    current_url = f"{BASE_URL}/catalogue/category/books/{category}/{next_href}"
-                else:
-                    if next_href.startswith('catalogue/'):
-                        current_url = f"{BASE_URL}/{next_href}"
-                    else:
-                        current_url = f"{BASE_URL}/catalogue/{next_href}"
+                current_url = urljoin(current_url, next_href)
             else:
                 current_url = None
 
@@ -229,8 +180,6 @@ def scrape_books(num_pages: int = 1, category: str = '') -> List[Dict]:
 
     except Exception as e:
         logger.error(f"Scraping failed: {e}")
-    finally:
-        driver.quit()
+        raise ValueError(f"Scraping failed: {str(e)}")
 
-    logger.info(f"Scraping complete. Total books: {len(books)}")
     return books

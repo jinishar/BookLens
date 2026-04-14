@@ -125,10 +125,14 @@ export default function BooksPageContent() {
       {genres.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6 fade-in">
           <button
-            onClick={() => setGenre('')}
+            onClick={() => {
+              setGenre('');
+              setSearch('');
+              setMinRating('');
+            }}
             style={{
-              background: !genre ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.08)',
-              color: !genre ? '#a78bfa' : '#6366f1',
+              background: !genre && !search && !minRating ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.08)',
+              color: !genre && !search && !minRating ? '#a78bfa' : '#6366f1',
               border: '1px solid rgba(99,102,241,0.3)',
               padding: '5px 14px',
               borderRadius: 20,
@@ -137,7 +141,7 @@ export default function BooksPageContent() {
               cursor: 'pointer',
             }}
           >
-            All
+            All Books
           </button>
           {genres.slice(0, 15).map((g) => (
             <button

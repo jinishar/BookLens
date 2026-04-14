@@ -113,16 +113,26 @@ def call_openai(prompt: str, max_tokens: int = 500) -> str:
 
 def rule_based_fallback(prompt: str) -> str:
     """Rule-based fallback when no LLM is available."""
+    # If this is a RAG query (indicated by 'CONTEXT:'), extract and return the context data
+    if 'CONTEXT:' in prompt:
+        try:
+            context_part = prompt.split('CONTEXT:')[1].split('QUESTION:')[0].strip()
+            if context_part:
+                return f"[Fallback AI] Without an active LLM, here is the raw extracted knowledge I found relevant to your question:\n\n{context_part}"
+        except Exception:
+            pass
+
     p = prompt.lower()
     if 'summary' in p:
-        return "This book presents an engaging narrative that captivates readers through well-developed characters and a compelling storyline. The author masterfully weaves themes that resonate with a broad audience."
+        return "This book presents an engaging narrative that captivates readers through well-developed characters and a compelling storyline."
     elif 'genre' in p or 'classif' in p:
         return "Fiction"
     elif 'sentiment' in p:
         return "Positive — The book evokes a generally optimistic and engaging tone throughout its narrative."
     elif 'recommend' in p:
         return "Readers who enjoy this book will appreciate its thematic depth and narrative style."
-    return "Unable to generate insight at this time."
+    
+    return "[Fallback AI] I'm unable to process this request because no Local LLM (LM Studio) or OpenAI API key is configured. Please start your LM Studio server or provide an API key."
 
 
 # ──────────────────────────────────────────────────────────────
