@@ -64,6 +64,7 @@ def call_llm(prompt: str, max_tokens: int = 500) -> str:
             return call_gemini(prompt, max_tokens)
         except Exception as e:
             logger.warning(f"Gemini unavailable: {e}")
+            return f"Gemini API Error: {str(e)} (Are you out of API quota?)"
 
     if getattr(settings, 'OPENAI_API_KEY', None):
         try:
@@ -80,8 +81,8 @@ def call_gemini(prompt: str, max_tokens: int = 500) -> str:
     import google.generativeai as genai
     genai.configure(api_key=settings.GEMINI_API_KEY)
     
-    # We use gemini-1.5-flash since it's fast and suitable for extraction
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # We use gemini-2.5-flash since 1.5 is missing/unsupported for this key
+    model = genai.GenerativeModel('gemini-2.5-flash')
     
     system_instruction = "You are a helpful book analysis assistant."
     full_prompt = f"{system_instruction}\n\nUser: {prompt}"
