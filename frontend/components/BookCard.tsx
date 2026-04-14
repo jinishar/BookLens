@@ -32,22 +32,19 @@ export default function BookCard({ book }: BookCardProps) {
 
   return (
     <Link href={`/books/${book.id}`} className="block group">
-      <div className="glass-card overflow-hidden h-full transition-all duration-300 group-hover:scale-[1.02] group-hover:-translate-y-1"
-        style={{ cursor: 'pointer' }}>
+      <div className="glass-card overflow-hidden h-full">
         
         {/* Cover Image */}
-        <div className="relative h-48 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a2e, #0d0d1a)' }}>
+        <div className="relative h-48 overflow-hidden bg-gray-100">
           <img
             src={book.cover_image_url || fallbackCover}
             alt={book.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               (e.target as HTMLImageElement).src = fallbackCover;
             }}
           />
-          <div className="absolute inset-0" style={{
-            background: 'linear-gradient(to top, rgba(10,10,18,0.9) 0%, transparent 50%)',
-          }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
           
           {/* Genre badge */}
           {book.genre && (
@@ -68,28 +65,27 @@ export default function BookCard({ book }: BookCardProps) {
 
         {/* Content */}
         <div className="p-4 flex flex-col gap-2">
-          <h3 className="font-semibold text-sm leading-tight line-clamp-2"
-            style={{ color: '#f1f5f9', fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="font-bold text-base leading-tight line-clamp-2 text-gray-900"
+            style={{ fontFamily: "var(--font-playfair), serif" }}>
             {book.title}
           </h3>
 
-          <div className="flex items-center gap-1 text-xs" style={{ color: '#94a3b8' }}>
-            <User size={11} />
+          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium tracking-tight">
+            <User size={12} />
             <span className="truncate">{book.author}</span>
           </div>
 
           <StarRating rating={book.rating} />
 
           {book.description && (
-            <p className="text-xs line-clamp-2 mt-1" style={{ color: '#64748b' }}>
+            <p className="text-xs line-clamp-2 mt-1 text-gray-600">
               {book.description}
             </p>
           )}
 
-          <div className="flex items-center justify-between mt-2 pt-2"
-            style={{ borderTop: '1px solid rgba(99,102,241,0.1)' }}>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
             {book.price && (
-              <span className="text-xs font-bold" style={{ color: '#f59e0b' }}>
+              <span className="text-sm font-bold text-[#b45309]">
                 {book.price}
               </span>
             )}
@@ -100,10 +96,9 @@ export default function BookCard({ book }: BookCardProps) {
                   e.stopPropagation();
                   window.open(book.book_url, '_blank', 'noopener,noreferrer');
                 }}
-                className="flex items-center gap-1 text-xs transition-colors"
-                style={{ color: '#6366f1', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                className="flex items-center gap-1 text-xs font-semibold text-[#d97706] hover:text-[#b45309] transition-colors bg-transparent border-none p-0 cursor-pointer"
               >
-                <ExternalLink size={11} />
+                <ExternalLink size={12} />
                 View
               </button>
             )}

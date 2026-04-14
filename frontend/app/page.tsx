@@ -63,19 +63,19 @@ export default function DashboardPage() {
           <div className="pulse-dot" />
           <span className="text-xs font-medium" style={{ color: '#10b981' }}>Live Intelligence Platform</span>
         </div>
-        <h1 className="text-5xl font-black mb-3 gradient-text" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1 className="text-6xl md:text-7xl font-black mb-4 text-[#1a1a1a]" style={{ fontFamily: "var(--font-playfair), serif", letterSpacing: "-0.02em" }}>
           BookLens
         </h1>
-        <p className="text-lg max-w-2xl" style={{ color: '#94a3b8' }}>
+        <p className="text-lg max-w-2xl text-gray-600">
           AI-powered book intelligence. Scrape, analyze, and query books with RAG-based question answering and smart recommendations.
         </p>
-        <div className="flex flex-wrap gap-3 mt-6">
-          <Link href="/books" className="btn-primary flex items-center gap-2">
-            <BookOpen size={16} /> Browse Books
+        <div className="flex flex-wrap gap-4 mt-8">
+          <Link href="/books" className="btn-primary flex items-center gap-2 text-lg px-6 py-3">
+            <BookOpen size={18} /> Browse Library
           </Link>
-          <Link href="/qa" className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
-            style={{ background: 'rgba(99,102,241,0.1)', color: '#a78bfa', border: '1px solid rgba(99,102,241,0.3)' }}>
-            <Brain size={16} /> Ask AI
+          <Link href="/qa" className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-lg transition-all hover:bg-gray-100"
+            style={{ background: '#ffffff', color: '#1a1a1a', border: '1px solid #e2e0d8', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <Brain size={18} className="text-[#e5b400]" /> Ask AI Assistant
           </Link>
         </div>
       </div>
@@ -85,13 +85,13 @@ export default function DashboardPage() {
         {statCards.map((card) => (
           <div key={card.label} className="glass-card p-5 fade-in">
             <div className="flex items-center justify-between mb-3">
-              <card.icon size={18} style={{ color: card.color }} />
-              <TrendingUp size={12} style={{ color: '#475569' }} />
+              <card.icon size={20} className="text-[#e5b400]" />
+              <TrendingUp size={14} className="text-gray-400" />
             </div>
-            <div className="text-3xl font-black mb-1" style={{ color: card.color }}>
+            <div className="text-3xl font-black mb-1 text-gray-900">
               {loading ? <div className="h-8 w-16 shimmer" /> : `${card.value}${card.suffix || ''}`}
             </div>
-            <div className="text-xs" style={{ color: '#64748b' }}>{card.label}</div>
+            <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">{card.label}</div>
           </div>
         ))}
       </div>
@@ -100,18 +100,18 @@ export default function DashboardPage() {
       <div className="glass-card p-6 mb-10 fade-in">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex-1">
-            <h2 className="font-bold text-lg mb-1 flex items-center gap-2">
-              <Download size={18} style={{ color: '#6366f1' }} />
+            <h2 className="font-bold text-lg mb-1 flex items-center gap-2 text-gray-900">
+              <Download size={18} className="text-[#e5b400]" />
               Import Books via Selenium
             </h2>
-            <p className="text-sm" style={{ color: '#64748b' }}>
-              Automatically scrape books from <b style={{ color: '#a78bfa' }}>books.toscrape.com</b> with AI insight generation.
+            <p className="text-sm text-gray-600">
+              Automatically scrape books from <b className="text-gray-900">books.toscrape.com</b> with AI insight generation.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="text-sm whitespace-nowrap" style={{ color: '#94a3b8' }}>Pages:</label>
+              <label className="text-sm whitespace-nowrap text-gray-600 font-medium">Pages:</label>
               <input
                 type="number"
                 min={1}
@@ -135,17 +135,17 @@ export default function DashboardPage() {
       {/* Top Genres */}
       {stats?.top_genres && stats.top_genres.length > 0 && (
         <div className="mb-10 fade-in">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Layers size={18} style={{ color: '#f59e0b' }} /> Top Genres
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900">
+            <Layers size={18} className="text-[#e5b400]" /> Top Genres
           </h2>
           <div className="flex flex-wrap gap-3">
             {stats.top_genres.map((g) => (
               <Link key={g.genre} href={`/books?genre=${encodeURIComponent(g.genre)}`}>
-                <span className="glass-card px-4 py-2 flex items-center gap-2 text-sm cursor-pointer transition-all hover:scale-105"
+                <span className="glass-card px-4 py-2 flex items-center gap-2 text-sm hover:scale-105"
                   style={{ borderRadius: 20 }}>
-                  <span style={{ color: '#a78bfa', fontWeight: 600 }}>{g.genre}</span>
+                  <span className="font-bold text-gray-800">{g.genre}</span>
                   <span className="badge badge-rating">{g.count} books</span>
-                  <span style={{ color: '#fbbf24', fontSize: 11 }}>★ {g.avg_rating?.toFixed(1)}</span>
+                  <span className="text-[11px] font-bold text-[#b45309]">★ {g.avg_rating?.toFixed(1)}</span>
                 </span>
               </Link>
             ))}
@@ -156,16 +156,14 @@ export default function DashboardPage() {
       {/* Recent Books */}
       <div className="fade-in">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <BookOpen size={18} style={{ color: '#6366f1' }} /> Recently Added
+          <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900">
+            <BookOpen size={18} className="text-[#e5b400]" /> Recently Added
           </h2>
           <div className="flex items-center gap-3">
-            <button onClick={fetchData} className="flex items-center gap-1 text-sm transition-colors"
-              style={{ color: '#64748b' }}>
+            <button onClick={fetchData} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors">
               <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> Refresh
             </button>
-            <Link href="/books" className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-indigo-400"
-              style={{ color: '#6366f1' }}>
+            <Link href="/books" className="flex items-center gap-1 text-sm font-medium text-[#d97706] hover:text-[#b45309] transition-colors">
               View All <ChevronRight size={14} />
             </Link>
           </div>
@@ -176,10 +174,10 @@ export default function DashboardPage() {
             {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : recentBooks.length === 0 ? (
-          <div className="glass-card p-12 text-center">
-            <BookOpen size={48} className="mx-auto mb-4" style={{ color: '#374151' }} />
-            <p className="text-lg font-semibold mb-2" style={{ color: '#94a3b8' }}>No Books Yet</p>
-            <p className="text-sm mb-6" style={{ color: '#475569' }}>
+          <div className="glass-card p-12 text-center border-dashed border-2 border-[#e2e0d8] shadow-none bg-transparent">
+            <BookOpen size={48} className="mx-auto mb-4 text-gray-300" />
+            <p className="text-lg font-bold mb-2 text-gray-700">No Books Yet</p>
+            <p className="text-sm mb-6 text-gray-500">
               Use the scraper above to import books, or add them manually.
             </p>
             <Link href="/books" className="btn-primary inline-flex items-center gap-2">

@@ -35,8 +35,9 @@ export default function BooksPageContent() {
       setTotal(res.data.count);
       setHasNext(!!res.data.next);
       setHasPrev(!!res.data.previous);
-    } catch {
-      toast.error('Failed to load books.');
+    } catch (error: any) {
+      console.error("API Error in fetchBooks:", error);
+      toast.error(error?.response?.data?.message || 'Failed to load books.');
     } finally {
       setLoading(false);
     }
@@ -66,11 +67,13 @@ export default function BooksPageContent() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       {/* Header */}
-      <div className="mb-8 fade-in">
-        <h1 className="text-4xl font-black mb-2 gradient-text" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Book Library
-        </h1>
-        <p style={{ color: '#94a3b8' }}>{total} books available</p>
+      <div className="mb-10 fade-in flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-5xl font-black mb-2 gradient-text tracking-tight" style={{ fontFamily: "var(--font-playfair), serif" }}>
+            Book Library
+          </h1>
+          <p className="text-lg" style={{ color: '#94a3b8' }}>Discover {total} books with AI insights</p>
+        </div>
       </div>
 
       {/* Filters */}
@@ -123,23 +126,15 @@ export default function BooksPageContent() {
 
       {/* Genre pills */}
       {genres.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6 fade-in">
+        <div className="flex flex-wrap gap-3 mb-8 fade-in">
           <button
             onClick={() => {
               setGenre('');
               setSearch('');
               setMinRating('');
             }}
-            style={{
-              background: !genre && !search && !minRating ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.08)',
-              color: !genre && !search && !minRating ? '#a78bfa' : '#6366f1',
-              border: '1px solid rgba(99,102,241,0.3)',
-              padding: '5px 14px',
-              borderRadius: 20,
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${!genre && !search && !minRating ? 'bg-indigo-500/20 border-indigo-400/50 text-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'}`}
+            style={{ borderWidth: '1px' }}
           >
             All Books
           </button>
@@ -147,17 +142,8 @@ export default function BooksPageContent() {
             <button
               key={g}
               onClick={() => setGenre(g)}
-              style={{
-                background: genre === g ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.08)',
-                color: genre === g ? '#a78bfa' : '#6366f1',
-                border: '1px solid rgba(99,102,241,0.3)',
-                padding: '5px 14px',
-                borderRadius: 20,
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${genre === g ? 'bg-indigo-500/20 border-indigo-400/50 text-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200'}`}
+              style={{ borderWidth: '1px' }}
             >
               {g}
             </button>
