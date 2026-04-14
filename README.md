@@ -1,4 +1,4 @@
-# BookLens — AI-Powered Book Intelligence Platform
+# BookLens ~ AI-Powered Book Intelligence Platform
 
 A full-stack web application with AI/RAG integration for intelligent book discovery and querying.
 
