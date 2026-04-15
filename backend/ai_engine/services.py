@@ -59,36 +59,36 @@ def call_llm(prompt: str, max_tokens: int = 500) -> str:
     Call LLM. Tries Gemini, then falls back to OpenAI,
     then falls back to rule-based if neither is available.
     """
-    # Try Gemini first
     if getattr(settings, 'GEMINI_API_KEY', None):
         try:
             return call_gemini(prompt, max_tokens)
         except Exception as e:
-            logger.warning(f"Gemini unavailable, falling back to OpenAI: {e}")
+            logger.warning(f"Gemini unavailable: {e}")
 
-    # Fallback to OpenAI
     if getattr(settings, 'OPENAI_API_KEY', None):
         try:
             return call_openai(prompt, max_tokens)
         except Exception as e:
-            logger.warning(f"OpenAI also unavailable: {e}")
+            logger.warning(f"OpenAI unavailable: {e}")
 
-    # Final fallback: rule-based
+    # Fallback: rule-based
     return rule_based_fallback(prompt)
 
 
 def call_gemini(prompt: str, max_tokens: int = 500) -> str:
-    """Call Google Gemini API using the new google.genai SDK."""
-    from google import genai
-    from google.genai import types
-
-    client = genai.Client(api_key=settings.GEMINI_API_KEY)
-
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction="You are a helpful book analysis assistant.",
+    """Call Google Gemini API."""
+    import google.generativeai as genai
+    genai.configure(api_key=settings.GEMINI_API_KEY)
+    
+    # We use gemini-1.5-flash since it's fast and suitable for extraction
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    system_instruction = "You are a helpful book analysis assistant."
+    full_prompt = f"{system_instruction}\n\nUser: {prompt}"
+    
+    response = model.generate_content(
+        full_prompt,
+        generation_config=genai.types.GenerationConfig(
             max_output_tokens=max_tokens,
             temperature=0.7,
         )

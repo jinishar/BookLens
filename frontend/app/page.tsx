@@ -56,63 +56,29 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen">
-      {/* Hero with Wallpaper */}
-      <div className="relative w-full fade-in" style={{ minHeight: '75vh' }}>
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: 'url(/hero-bg.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
-        {/* Dark Gradient Overlay */}
-        <div
-          className="absolute inset-0 z-[1]"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(15, 10, 5, 0.55) 0%, rgba(25, 18, 8, 0.75) 60%, rgba(30, 22, 10, 0.95) 100%)',
-          }}
-        />
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col justify-center" style={{ minHeight: '75vh', paddingTop: '8rem', paddingBottom: '4rem' }}>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="pulse-dot" />
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#fbbf24' }}>Live Intelligence Platform</span>
-          </div>
-          <h1
-            className="font-black mb-5"
-            style={{
-              fontFamily: "var(--font-playfair), serif",
-              letterSpacing: "-0.02em",
-              fontSize: 'clamp(3rem, 8vw, 5.5rem)',
-              color: '#fff',
-              lineHeight: 1.05,
-              textShadow: '0 4px 24px rgba(0,0,0,0.5)',
-            }}
-          >
-            Book<span style={{ color: '#fbbf24' }}>Lens</span>
-          </h1>
-          <p className="text-lg md:text-xl max-w-2xl mb-10" style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 1.6 }}>
-            AI-powered book intelligence. Scrape, analyze, and query books with RAG-based question answering and smart recommendations.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/books" className="flex items-center gap-2 text-lg px-7 py-3.5 rounded-lg font-bold transition-all hover:scale-105"
-              style={{ background: '#fbbf24', color: '#1a1a1a', boxShadow: '0 4px 20px rgba(251,191,36,0.4)' }}>
-              <BookOpen size={20} /> Browse Library
-            </Link>
-            <Link href="/qa" className="flex items-center gap-2 px-7 py-3.5 rounded-lg font-semibold text-lg transition-all hover:scale-105"
-              style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)' }}>
-              <Brain size={20} style={{ color: '#fbbf24' }} /> Ask AI Assistant
-            </Link>
-          </div>
+    <div className="max-w-7xl mx-auto px-6 py-10">
+      {/* Hero */}
+      <div className="mb-12 fade-in">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="pulse-dot" />
+          <span className="text-xs font-medium" style={{ color: '#10b981' }}>Live Intelligence Platform</span>
+        </div>
+        <h1 className="text-6xl md:text-7xl font-black mb-4 text-[#1a1a1a]" style={{ fontFamily: "var(--font-playfair), serif", letterSpacing: "-0.02em" }}>
+          BookLens
+        </h1>
+        <p className="text-lg max-w-2xl text-gray-600">
+          AI-powered book intelligence. Scrape, analyze, and query books with RAG-based question answering and smart recommendations.
+        </p>
+        <div className="flex flex-wrap gap-4 mt-8">
+          <Link href="/books" className="btn-primary flex items-center gap-2 text-lg px-6 py-3">
+            <BookOpen size={18} /> Browse Library
+          </Link>
+          <Link href="/qa" className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-lg transition-all hover:bg-gray-100"
+            style={{ background: '#ffffff', color: '#1a1a1a', border: '1px solid #e2e0d8', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <Brain size={18} className="text-[#e5b400]" /> Ask AI Assistant
+          </Link>
         </div>
       </div>
-
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 py-10" style={{ marginTop: '-2rem', position: 'relative', zIndex: 2 }}>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
@@ -225,7 +191,6 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
       </div>
     </div>
   );
