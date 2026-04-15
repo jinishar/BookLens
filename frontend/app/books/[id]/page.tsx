@@ -128,7 +128,7 @@ export default function BookDetailPage() {
           <div className="glass-card p-5 mt-4 space-y-3">
             {book.price && (
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm" style={{ color: '#94a3b8' }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: '#6b7280' }}>
                   <ShoppingCart size={14} /> Price
                 </div>
                 <span className="font-bold" style={{ color: '#f59e0b' }}>{book.price}</span>
@@ -136,7 +136,7 @@ export default function BookDetailPage() {
             )}
             {book.availability && (
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm" style={{ color: '#94a3b8' }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: '#6b7280' }}>
                   <BookOpen size={14} /> Availability
                 </div>
                 <span className="text-sm" style={{ color: '#10b981' }}>{book.availability}</span>
@@ -144,10 +144,10 @@ export default function BookDetailPage() {
             )}
             {book.upc && (
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm" style={{ color: '#94a3b8' }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: '#6b7280' }}>
                   <Hash size={14} /> UPC
                 </div>
-                <span className="text-sm font-mono" style={{ color: '#64748b' }}>{book.upc}</span>
+                <span className="text-sm font-mono" style={{ color: '#4b5563' }}>{book.upc}</span>
               </div>
             )}
             {book.book_url && (
@@ -168,11 +168,11 @@ export default function BookDetailPage() {
           </div>
 
           <h1 className="text-4xl font-black mb-3 leading-tight"
-            style={{ color: '#f1f5f9', fontFamily: "'Playfair Display', serif" }}>
+            style={{ color: '#1a1a1a', fontFamily: "'Playfair Display', serif" }}>
             {book.title}
           </h1>
 
-          <div className="flex items-center gap-2 mb-4" style={{ color: '#94a3b8' }}>
+          <div className="flex items-center gap-2 mb-4" style={{ color: '#4b5563' }}>
             <User size={15} />
             <span className="text-lg">{book.author}</span>
           </div>
@@ -180,16 +180,16 @@ export default function BookDetailPage() {
           <div className="mb-6">
             <StarRating rating={book.rating} />
             {book.num_reviews > 0 && (
-              <p className="text-sm mt-1" style={{ color: '#64748b' }}>{book.num_reviews} reviews</p>
+              <p className="text-sm mt-1" style={{ color: '#6b7280' }}>{book.num_reviews} reviews</p>
             )}
           </div>
 
           {book.description && (
             <div className="glass-card p-5 mb-6">
-              <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: '#94a3b8' }}>
+              <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: '#6b7280' }}>
                 <FileText size={14} /> Description
               </h3>
-              <p className="text-sm leading-relaxed" style={{ color: '#cbd5e1' }}>{book.description}</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#374151' }}>{book.description}</p>
             </div>
           )}
 
@@ -237,7 +237,7 @@ export default function BookDetailPage() {
                       {config.label}
                     </h3>
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: '#cbd5e1' }}>
+                  <p className="text-sm leading-relaxed" style={{ color: '#374151' }}>
                     {insight.content}
                   </p>
                 </div>
