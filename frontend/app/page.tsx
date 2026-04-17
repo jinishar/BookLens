@@ -56,31 +56,50 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      {/* Hero */}
-      <div className="mb-12 fade-in">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="pulse-dot" />
-          <span className="text-xs font-medium" style={{ color: '#10b981' }}>Live Intelligence Platform</span>
-        </div>
-        <h1 className="text-6xl md:text-7xl font-black mb-4 text-[#1a1a1a]" style={{ fontFamily: "var(--font-playfair), serif", letterSpacing: "-0.02em" }}>
-          BookLens
-        </h1>
-        <p className="text-lg max-w-2xl text-gray-600">
-          AI-powered book intelligence. Scrape, analyze, and query books with RAG-based question answering and smart recommendations.
-        </p>
-        <div className="flex flex-wrap gap-4 mt-8">
-          <Link href="/books" className="btn-primary flex items-center gap-2 text-lg px-6 py-3">
-            <BookOpen size={18} /> Browse Library
-          </Link>
-          <Link href="/qa" className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-lg transition-all hover:bg-gray-100"
-            style={{ background: '#ffffff', color: '#1a1a1a', border: '1px solid #e2e0d8', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-            <Brain size={18} className="text-[#e5b400]" /> Ask AI Assistant
-          </Link>
+    <div className="min-h-screen bg-[#f8f6f0] pb-10">
+      {/* Hero Section */}
+      <div className="relative w-full py-24 flex items-center">
+        {/* Dashboard Wallpaper */}
+        <div 
+          className="absolute inset-0 z-[0]"
+          style={{
+            backgroundImage: "url('/BookWallpaper.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        />
+        {/* Dark gradient overlay for contrast against the image */}
+        <div className="absolute inset-0 z-[0] bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
+          {/* Hero Content */}
+          <div className="fade-in">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-2 h-2 rounded-full bg-[#10b981]" />
+              <span className="text-xs font-bold uppercase tracking-widest text-[#fbbf24]">Live Intelligence Platform</span>
+            </div>
+            <h1 className="text-6xl md:text-8xl font-black mb-6 text-white" style={{ fontFamily: "var(--font-playfair), serif", letterSpacing: "-0.02em" }}>
+              Book<span className="text-[#fbbf24]">Lens</span>
+            </h1>
+            <p className="text-xl max-w-2xl text-gray-200">
+              AI-powered book intelligence. Scrape, analyze, and query books with RAG-based question answering and smart recommendations.
+            </p>
+            <div className="flex flex-wrap gap-4 mt-8">
+              <Link href="/books" className="flex items-center gap-2 text-lg px-6 py-4 rounded-xl font-bold transition-all hover:brightness-110" style={{ backgroundColor: '#fbbf24', color: '#1a1a1a' }}>
+                <BookOpen size={20} /> Browse Library
+              </Link>
+              <Link href="/qa" className="flex items-center gap-2 px-6 py-4 rounded-xl font-bold text-lg transition-all hover:bg-[#404040]"
+                style={{ background: '#333333', color: '#ffffff', border: '1px solid #4a4a4a' }}>
+                <Brain size={20} className="text-[#fbbf24]" /> Ask AI Assistant
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Stats */}
+      <div className="max-w-7xl mx-auto px-6 pt-10">
+        {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {statCards.map((card) => (
           <div key={card.label} className="glass-card p-5 fade-in">
@@ -191,6 +210,7 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
