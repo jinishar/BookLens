@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`} data-scroll-behavior="smooth">
       <body className="antialiased">
         <Navbar />
         <main className="pt-16 min-h-screen relative z-10">

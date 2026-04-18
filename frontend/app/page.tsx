@@ -39,7 +39,17 @@ export default function DashboardPage() {
     const toastId = toast.loading(`Scraping ${scrapePages} page(s) from books.toscrape.com...`);
     try {
       const res = await scrapeBooks({ num_pages: scrapePages, generate_insights: true });
-      toast.success(`✓ Created ${res.data.created} books, skipped ${res.data.skipped} duplicates.`, { id: toastId, duration: 5000 });
+      const { created, to_process, skipped } = res.data;
+      
+      let message = `✓ Created ${created} new books.`;
+      if (to_process > created) {
+        message += ` Also processing ${to_process - created} existing books.`;
+      }
+      if (skipped > (to_process - created)) {
+        message += ` Skipped ${skipped - (to_process - created)} already processed.`;
+      }
+      
+      toast.success(message, { id: toastId, duration: 5000 });
       fetchData();
     } catch (e: any) {
       toast.error(e?.response?.data?.error || 'Scraping failed.', { id: toastId });

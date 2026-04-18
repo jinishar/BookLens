@@ -123,6 +123,13 @@ def scrape_books(num_pages: int = 1, category: str = '') -> List[Dict]:
                     title = title_tag.get('title', title_tag.get_text(strip=True))
                     relative_url = title_tag.get('href', '')
                     
+                    # Optimization: Skip detail scraping if book already exists and is processed
+                    from books.models import Book
+                    existing = Book.objects.filter(title=title).first()
+                    if existing and existing.is_processed:
+                        logger.info(f"Skipping detail scrape for existing book: {title}")
+                        continue
+
                     # Resolve absolute URL safely
                     book_url = urljoin(current_url, relative_url)
 

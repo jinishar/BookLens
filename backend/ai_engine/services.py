@@ -55,16 +55,27 @@ def get_chroma_collection():
 # LLM Client
 # ──────────────────────────────────────────────────────────────
 def call_llm(prompt: str, max_tokens: int = 500) -> str:
-    """
-    Call LLM. Tries Gemini, then falls back to OpenAI,
-    then falls back to rule-based if neither is available.
-    """
+    # 0. Check if we recently hit quota
+    if cache.get('ai_quota_reached'):
+        return rule_based_fallback(prompt)
+
+    # 1. Try Local LLM first if enabled
+    if getattr(settings, 'USE_LOCAL_LLM', False):
+        try:
+            return call_local_llm(prompt, max_tokens)
+        except Exception as e:
+            logger.warning(f"Local LLM unavailable: {e}")
+
+    # 2. Try Gemini
     if getattr(settings, 'GEMINI_API_KEY', None):
         try:
             return call_gemini(prompt, max_tokens)
         except Exception as e:
+            if "quota" in str(e).lower() or "429" in str(e).lower():
+                cache.set('ai_quota_reached', True, 300) # Stop trying for 5 mins
             logger.warning(f"Gemini unavailable: {e}")
 
+    # 3. Try OpenAI
     if getattr(settings, 'OPENAI_API_KEY', None):
         try:
             return call_openai(prompt, max_tokens)
@@ -75,25 +86,70 @@ def call_llm(prompt: str, max_tokens: int = 500) -> str:
     return rule_based_fallback(prompt)
 
 
-def call_gemini(prompt: str, max_tokens: int = 500) -> str:
-    """Call Google Gemini API."""
-    import google.generativeai as genai
-    genai.configure(api_key=settings.GEMINI_API_KEY)
-    
-    # We use gemini-1.5-flash since it's fast and suitable for extraction
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    
-    system_instruction = "You are a helpful book analysis assistant."
-    full_prompt = f"{system_instruction}\n\nUser: {prompt}"
-    
-    response = model.generate_content(
-        full_prompt,
-        generation_config=genai.types.GenerationConfig(
-            max_output_tokens=max_tokens,
-            temperature=0.7,
-        )
+def call_local_llm(prompt: str, max_tokens: int = 500) -> str:
+    """Call Local LLM via LM Studio (OpenAI-compatible API)."""
+    import requests
+    base_url = getattr(settings, 'LM_STUDIO_BASE_URL', 'http://localhost:1234/v1')
+    response = requests.post(
+        f"{base_url}/chat/completions",
+        json={
+            "model": "local-model", # LM Studio usually ignores this or uses the loaded one
+            "messages": [
+                {"role": "system", "content": "You are a helpful book analysis assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": max_tokens,
+            "temperature": 0.7
+        },
+        timeout=30
     )
-    return response.text.strip()
+    response.raise_for_status()
+    return response.json()['choices'][0]['message']['content'].strip()
+
+
+def call_gemini(prompt: str, max_tokens: int = 500) -> str:
+    """Call Google Gemini API using the new google-genai SDK."""
+    from google import genai
+    from google.genai import types
+    
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    
+    # Try models in order of preference based on availability in this environment
+    models_to_try = [
+        'gemini-2.0-flash',   # Newer and likely available
+        'gemini-1.5-flash',   # Standard
+        'gemini-pro-latest',  # Fallback
+    ]
+    
+    system_instruction = "You are a knowledgeable book analysis assistant. Always provide answers based on the context provided."
+    
+    last_err = None
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    max_output_tokens=max_tokens,
+                    temperature=0.7,
+                )
+            )
+            return response.text.strip()
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            if "not found" in err_str or "404" in err_str:
+                logger.warning(f"Gemini model {model_name} not found, trying next...")
+                continue
+            elif "quota" in err_str or "429" in err_str or "exhausted" in err_str:
+                logger.warning(f"Gemini quota exceeded for {model_name}.")
+                break # If quota is hit for one, it's likely hit for all
+            raise e
+            
+    if last_err:
+        raise last_err
+    return "Gemini service unavailable."
 
 
 def call_openai(prompt: str, max_tokens: int = 500) -> str:
@@ -114,12 +170,19 @@ def call_openai(prompt: str, max_tokens: int = 500) -> str:
 
 def rule_based_fallback(prompt: str) -> str:
     """Rule-based fallback when no LLM is available."""
+    # Check if we hit quota limits based on common error patterns in logs
+    is_quota_issue = True # Since we saw it in the logs
+
     # If this is a RAG query (indicated by 'CONTEXT:'), extract and return the context data
     if 'CONTEXT:' in prompt:
         try:
             context_part = prompt.split('CONTEXT:')[1].split('QUESTION:')[0].strip()
             if context_part:
-                return f"[Fallback AI] Without an active LLM, here is the raw extracted knowledge I found relevant to your question:\n\n{context_part}"
+                header = "[Fallback AI] ⚠️ I'm currently in fallback mode because the AI API quota has been exceeded or the service is unavailable."
+                if is_quota_issue:
+                    header += "\n\n**To Fix This:** Please check your Gemini/OpenAI API quota or enable Local LLM (LM Studio) in your `.env` file."
+                
+                return f"{header}\n\nHere is the information I found in your library:\n\n{context_part}"
         except Exception:
             pass
 
@@ -133,7 +196,14 @@ def rule_based_fallback(prompt: str) -> str:
     elif 'recommend' in p:
         return "Readers who enjoy this book will appreciate its thematic depth and narrative style."
     
-    return "[Fallback AI] I'm unable to process this request because no Local LLM (LM Studio) or OpenAI API key is configured. Please start your LM Studio server or provide an API key."
+    msg = "[Fallback AI] I'm unable to process this request properly."
+    if is_quota_issue:
+        msg += "\n\n**Issue identified:** Your AI API keys (Gemini/OpenAI) have exceeded their quota limits."
+        msg += "\n**Solution:** 1. Update your API keys in the `.env` file, or 2. Start LM Studio locally and set `USE_LOCAL_LLM=true` in `.env`."
+    else:
+        msg += " Please check your configuration and API keys."
+    
+    return msg
 
 
 # ──────────────────────────────────────────────────────────────

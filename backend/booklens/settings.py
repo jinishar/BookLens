@@ -105,7 +105,7 @@ CHROMA_DB_PATH = str(BASE_DIR / 'chroma_db')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 LM_STUDIO_BASE_URL = os.getenv('LM_STUDIO_BASE_URL', 'http://localhost:1234/v1')
-USE_LOCAL_LLM = False  # Disabled in favor of OpenAI/Gemini
+USE_LOCAL_LLM = os.getenv('USE_LOCAL_LLM', 'false').lower() == 'true'
 
 # Embedding model (local, no API key needed)
 EMBEDDING_MODEL = 'all-MiniLM-L6-v2'

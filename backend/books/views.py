@@ -110,27 +110,34 @@ class BookScrapeView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         created_books = []
+        to_process_ids = []
         skipped = 0
+        
         for book_data in books_data:
             # Deduplication by title
             existing = Book.objects.filter(title=book_data['title']).first()
             if existing:
                 skipped += 1
+                if not existing.is_processed:
+                    to_process_ids.append(existing.id)
                 continue
+            
             book = Book.objects.create(**book_data)
             created_books.append(book)
+            to_process_ids.append(book.id)
 
-        # Process AI insights in background
-        if generate_insights and created_books:
-            thread = threading.Thread(target=_process_books_batch, args=([b.id for b in created_books],))
+        # Process AI insights in background (for both new and previously unprocessed books)
+        if generate_insights and to_process_ids:
+            thread = threading.Thread(target=_process_books_batch, args=(to_process_ids,))
             thread.daemon = True
             thread.start()
 
         cache.delete('book_list_all')
         return Response({
-            'message': f'Scraped {len(books_data)} books. Created: {len(created_books)}, Skipped (duplicates): {skipped}.',
+            'message': f'Scraped {len(books_data)} books. Created: {len(created_books)}, Processing: {len(to_process_ids)}, Skipped (already in DB): {skipped}.',
             'scraped': len(books_data),
             'created': len(created_books),
+            'to_process': len(to_process_ids),
             'skipped': skipped,
             'books': BookListSerializer(created_books, many=True).data,
         }, status=status.HTTP_201_CREATED)
