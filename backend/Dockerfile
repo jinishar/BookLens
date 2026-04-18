@@ -33,7 +33,7 @@ EXPOSE 8000
 RUN echo "#!/bin/sh\n\
 python manage.py collectstatic --noinput\n\
 python manage.py migrate\n\
-if [ -n \"$DJANGO_SUPERUSER_USERNAME\" ]; then\n\
+if [ -n \"\$DJANGO_SUPERUSER_USERNAME\" ]; then\n\
     python manage.py createsuperuser --no-input || true\n\
 fi\n\
 gunicorn booklens.wsgi:application --bind 0.0.0.0:\$PORT" > /app/start.sh
