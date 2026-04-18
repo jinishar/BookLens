@@ -36,7 +36,7 @@ python manage.py migrate\n\
 if [ -n \"\$DJANGO_SUPERUSER_USERNAME\" ]; then\n\
     python manage.py createsuperuser --no-input || true\n\
 fi\n\
-gunicorn booklens.wsgi:application --bind 0.0.0.0:\$PORT" > /app/start.sh
+gunicorn booklens.wsgi:application --bind 0.0.0.0:\$PORT --timeout 300 --workers 1" > /app/start.sh
 
 RUN chmod +x /app/start.sh
 
